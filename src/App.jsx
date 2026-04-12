@@ -175,13 +175,7 @@ function Header() {
       <div className="relative z-10">
         <Badge className="mb-3 bg-white/15 text-white">SOS Terra</Badge>
         <h1 className="text-3xl font-bold tracking-tight">Cuidar do ambiente começa perto da gente</h1>
-        <p className="mt-2 max-w-md text-sm leading-6 text-white/90">
-          Um app educativo sobre o ecossistema local com um joguinho de perguntas e respostas.
-        </p>
-        <div className="mt-4 flex items-center gap-2 text-sm text-white/90">
-          <MapPin className="h-4 w-4" />
-          <span>Conteúdo pronto para adaptar à sua cidade, bairro ou escola</span>
-        </div>
+
       </div>
     </div>
   );
