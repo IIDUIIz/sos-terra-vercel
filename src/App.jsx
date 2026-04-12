@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Analytics } from '@vercel/analytics/react';
 import {
   Leaf,
   Trees,
@@ -504,6 +505,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-lime-50 via-white to-emerald-50 p-3 sm:p-6">
+      <Analytics />
       <InstallBanner />
       <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col gap-4">
         <div className="flex-1 space-y-4 pb-24">
