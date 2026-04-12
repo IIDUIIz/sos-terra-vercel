@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Leaf,
@@ -13,6 +13,8 @@ import {
   XCircle,
   Sparkles,
   MapPin,
+  Download,
+  X,
 } from 'lucide-react';
 
 const ecosystemInfo = [
@@ -436,11 +438,64 @@ function QuizScreen() {
   );
 }
 
+function InstallBanner() {
+  const [prompt, setPrompt] = useState(null);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  if (!prompt || dismissed) return null;
+
+  const install = async () => {
+    prompt.prompt();
+    const { outcome } = await prompt.userChoice;
+    if (outcome === 'accepted') setPrompt(null);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -16 }}
+      className="fixed left-1/2 top-3 z-50 flex w-[calc(100%-24px)] max-w-md -translate-x-1/2 items-center gap-3 rounded-[20px] border border-emerald-200 bg-white/95 p-3 shadow-lg backdrop-blur"
+    >
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-emerald-100">
+        <Download className="h-5 w-5 text-emerald-700" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-slate-900">Instalar SOS Terra</p>
+        <p className="text-xs text-slate-500">Acesse como app, funciona offline</p>
+      </div>
+      <button
+        onClick={install}
+        className="shrink-0 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700"
+      >
+        Instalar
+      </button>
+      <button
+        onClick={() => setDismissed(true)}
+        className="shrink-0 rounded-xl p-1.5 text-slate-400 transition hover:bg-slate-100"
+        aria-label="Fechar"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </motion.div>
+  );
+}
+
 export default function App() {
   const [tab, setTab] = useState('inicio');
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-lime-50 via-white to-emerald-50 p-3 sm:p-6">
+      <InstallBanner />
       <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col gap-4">
         <div className="flex-1 space-y-4 pb-24">
           {tab === 'inicio' && (

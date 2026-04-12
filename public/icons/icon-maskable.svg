@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Maskable: safe zone is central 80% (approx 102px padding each side for a 512 icon) -->
+  <rect width="512" height="512" fill="#059669"/>
+  <circle cx="256" cy="256" r="140" fill="#ecfdf5"/>
+  <path d="M256 140 C318 156 356 198 358 252 C360 300 338 342 302 366 C284 378 270 383 256 383 C242 383 228 378 210 366 C174 342 152 300 154 252 C156 198 194 156 256 140Z" fill="#059669"/>
+  <path d="M256 170 Q263 248 256 378" stroke="#ecfdf5" stroke-width="11" stroke-linecap="round" fill="none"/>
+  <path d="M256 224 Q228 242 214 249" stroke="#ecfdf5" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <path d="M256 268 Q224 283 210 288" stroke="#ecfdf5" stroke-width="8" stroke-linecap="round" fill="none"/>
+  <path d="M256 224 Q284 240 298 247" stroke="#ecfdf5" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <path d="M256 268 Q288 282 302 286" stroke="#ecfdf5" stroke-width="8" stroke-linecap="round" fill="none"/>
+</svg>
