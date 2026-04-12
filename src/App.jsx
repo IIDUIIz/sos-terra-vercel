@@ -460,22 +460,22 @@ function InstallBanner() {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop + centralizador */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm"
         onClick={() => setDismissed(true)}
-      />
-
+      >
       {/* Card centralizado */}
       <motion.div
         initial={{ opacity: 0, scale: 0.92 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.92 }}
         transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-        className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-32px)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-[28px] bg-white p-6 shadow-2xl"
+        className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Ícone */}
         <div className="mb-4 flex justify-center">
@@ -508,6 +508,7 @@ function InstallBanner() {
             Agora não
           </button>
         </div>
+      </motion.div>
       </motion.div>
     </>
   );
