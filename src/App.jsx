@@ -238,16 +238,7 @@ function HomeScreen({ onStartQuiz, onOpenEcosystem }) {
 function EcosystemScreen() {
   return (
     <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Ecossistema local</CardTitle>
-          <CardDescription>
-            Esta parte explica, de forma simples, os elementos que formam o ambiente ao nosso redor.
-          </CardDescription>
-        </CardHeader>
-      </Card>
-
-      <div className="grid gap-4">
+<div className="grid gap-4">
         {ecosystemInfo.map((item, index) => {
           const Icon = item.icon;
           return (
