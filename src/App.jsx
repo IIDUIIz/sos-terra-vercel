@@ -14,7 +14,6 @@ import {
   Sparkles,
   MapPin,
   Download,
-  X,
 } from 'lucide-react';
 
 const ecosystemInfo = [
@@ -460,33 +459,57 @@ function InstallBanner() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -16 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -16 }}
-      className="fixed left-1/2 top-3 z-50 flex w-[calc(100%-24px)] max-w-md -translate-x-1/2 items-center gap-3 rounded-[20px] border border-emerald-200 bg-white/95 p-3 shadow-lg backdrop-blur"
-    >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-emerald-100">
-        <Download className="h-5 w-5 text-emerald-700" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-slate-900">Instalar SOS Terra</p>
-        <p className="text-xs text-slate-500">Acesse como app, funciona offline</p>
-      </div>
-      <button
-        onClick={install}
-        className="shrink-0 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700"
-      >
-        Instalar
-      </button>
-      <button
+    <>
+      {/* Backdrop */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
         onClick={() => setDismissed(true)}
-        className="shrink-0 rounded-xl p-1.5 text-slate-400 transition hover:bg-slate-100"
-        aria-label="Fechar"
+      />
+
+      {/* Card centralizado */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.92 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+        className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-32px)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-[28px] bg-white p-6 shadow-2xl"
       >
-        <X className="h-4 w-4" />
-      </button>
-    </motion.div>
+        {/* Ícone */}
+        <div className="mb-4 flex justify-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded-[28px] bg-emerald-100">
+            <Download className="h-9 w-9 text-emerald-700" />
+          </div>
+        </div>
+
+        {/* Texto */}
+        <div className="mb-6 text-center">
+          <h2 className="text-xl font-bold text-slate-900">Instalar SOS Terra</h2>
+          <p className="mt-1.5 text-sm leading-6 text-slate-500">
+            Adicione à sua tela inicial e acesse como um app, mesmo sem internet.
+          </p>
+        </div>
+
+        {/* Botões */}
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={install}
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-base font-semibold text-white transition active:scale-95 hover:bg-emerald-700"
+          >
+            <Download className="h-5 w-5" />
+            Instalar agora
+          </button>
+          <button
+            onClick={() => setDismissed(true)}
+            className="flex h-12 w-full items-center justify-center rounded-2xl text-sm font-medium text-slate-500 transition hover:bg-slate-100"
+          >
+            Agora não
+          </button>
+        </div>
+      </motion.div>
+    </>
   );
 }
 
