@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Analytics } from '@vercel/analytics/react';
 import {
   Leaf,
   Trees,
@@ -290,16 +291,7 @@ function HomeScreen({ onStartQuiz, onOpenEcosystem, onStartGame }) {
 function EcosystemScreen() {
   return (
     <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Ecossistema local</CardTitle>
-          <CardDescription>
-            Esta parte explica, de forma simples, os elementos que formam o ambiente ao nosso redor.
-          </CardDescription>
-        </CardHeader>
-      </Card>
-
-      <div className="grid gap-4">
+<div className="grid gap-4">
         {ecosystemInfo.map((item, index) => {
           const Icon = item.icon;
           return (
@@ -708,6 +700,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-lime-50 via-white to-emerald-50 p-3 sm:p-6">
+      <Analytics />
       <InstallBanner />
       <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col gap-4">
         <div className="flex-1 space-y-4 pb-24">
