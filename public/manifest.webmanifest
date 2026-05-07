@@ -1,7 +1,7 @@
 {
   "name": "SOS Terra",
   "short_name": "SOS Terra",
-  "description": "Aplicativo educativo sobre o ecossistema local com quiz interativo.",
+  "description": "Aplicativo educativo sobre o ecossistema local com quiz e jogo da memória.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f7fee7",
