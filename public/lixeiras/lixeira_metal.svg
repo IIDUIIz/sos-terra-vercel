@@ -1,0 +1,8 @@
+<svg viewBox="0 0 220 272" xmlns="http://www.w3.org/2000/svg">
+<path d="M 43 73 L 177 73 L 167 225 Q 166 231 160 231 L 60 231 Q 54 231 53 225 L 43 73 Z" fill="#F9A825"/><path d="M 167 225 Q 166 231 160 231 L 130 231 L 140 73 L 177 73 Z" fill="#000000" opacity="0.08"/><rect x="46" y="73" width="128" height="7" fill="#000000" opacity="0.10"/>
+<path d="M 95 124 L 95 178 Q 95 183 110 183 Q 125 183 125 178 L 125 124 Z" fill="#ffffff"/><ellipse cx="110" cy="124" rx="15" ry="5" fill="#ffffff"/><ellipse cx="110" cy="124" rx="11" ry="3.4" fill="#F9A825" opacity="0.30"/><ellipse cx="110" cy="123.5" rx="4" ry="2" fill="none" stroke="#F9A825" stroke-width="1.6" opacity="0.6"/><rect x="95" y="134" width="30" height="1.8" fill="#F9A825" opacity="0.16"/><rect x="95" y="139" width="30" height="1.8" fill="#F9A825" opacity="0.16"/><rect x="95" y="170" width="30" height="2.4" rx="1.2" fill="#F9A825" opacity="0.18"/>
+<rect x="87" y="33" width="46" height="15" rx="7.5" fill="#C17900"/><rect x="30" y="46" width="160" height="25" rx="11" fill="#C17900"/><rect x="30" y="46" width="160" height="9" rx="4.5" fill="#ffffff" opacity="0.12"/>
+<path d="M 115.08 58.71 L 118.47 59.19 A 8.55 8.55 0 0 1 109.11 66.50 L 108.90 68.49 L 106.38 63.80 L 109.67 61.12 L 109.46 63.10 A 5.13 5.13 0 0 0 115.08 58.71 Z" fill="#ffffff"/>
+<path d="M 106.84 62.04 L 104.74 64.74 A 8.55 8.55 0 0 1 103.08 52.97 L 101.47 51.80 L 106.79 51.96 L 107.46 56.16 L 105.85 54.98 A 5.13 5.13 0 0 0 106.84 62.04 Z" fill="#ffffff"/>
+<path d="M 108.08 53.24 L 106.80 50.07 A 8.55 8.55 0 0 1 117.81 54.52 L 119.63 53.71 L 116.84 58.24 L 112.86 56.72 L 114.69 55.91 A 5.13 5.13 0 0 0 108.08 53.24 Z" fill="#ffffff"/>
+</svg>

@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 import { Analytics } from '@vercel/analytics/react';
 import Mascot from './components/Mascot';
 import {
@@ -18,10 +18,10 @@ import {
   Sparkles,
   MapPin,
   Download,
+  ChevronRight,
 } from 'lucide-react';
 
 // ─── Ecosystem ─────────────────────────────────────────────────────────────────
-
 const ecosystemInfo = [
   {
     title: 'Flora local',
@@ -58,10 +58,10 @@ const ecosystemInfo = [
 ];
 
 // ─── Quiz ──────────────────────────────────────────────────────────────────────
-
 const quizQuestions = [
   {
     image: '🌿',
+    gradient: 'from-green-500 to-emerald-600',
     question: 'O que ajuda a proteger o ecossistema local?',
     options: [
       'Jogar lixo em áreas vazias',
@@ -74,6 +74,7 @@ const quizQuestions = [
   },
   {
     image: '🌳',
+    gradient: 'from-lime-500 to-green-600',
     question: 'Por que as árvores são importantes para o ambiente?',
     options: [
       'Porque aumentam a poluição',
@@ -86,6 +87,7 @@ const quizQuestions = [
   },
   {
     image: '💧',
+    gradient: 'from-blue-500 to-cyan-600',
     question: 'Qual atitude prejudica a água da comunidade?',
     options: [
       'Preservar nascentes',
@@ -98,6 +100,7 @@ const quizQuestions = [
   },
   {
     image: '🦋',
+    gradient: 'from-orange-400 to-amber-500',
     question: 'Os animais do ecossistema local são importantes porque...',
     options: [
       'não fazem diferença no ambiente',
@@ -110,6 +113,7 @@ const quizQuestions = [
   },
   {
     image: '♻️',
+    gradient: 'from-teal-500 to-emerald-600',
     question: 'Qual destas ações é uma atitude sustentável?',
     options: [
       'Desperdiçar água',
@@ -123,14 +127,13 @@ const quizQuestions = [
 ];
 
 // ─── Memory game ───────────────────────────────────────────────────────────────
-
 const memoryPairs = [
-  { id: 'arvore', name: 'Árvore', emoji: '🌳', hint: 'Protege o solo e abriga animais.' },
-  { id: 'borboleta', name: 'Borboleta', emoji: '🦋', hint: 'Poliniza flores e equilibra o ambiente.' },
-  { id: 'agua', name: 'Rio', emoji: '💧', hint: 'Fornece água limpa para a vida.' },
-  { id: 'flor', name: 'Flor', emoji: '🌸', hint: 'Atrai abelhas e borboletas.' },
-  { id: 'sol', name: 'Sol', emoji: '☀️', hint: 'Energia para toda a natureza.' },
-  { id: 'reciclagem', name: 'Reciclagem', emoji: '♻️', hint: 'Diminui o lixo na natureza.' },
+  { id: 'arvore', name: 'Árvore', emoji: '🌳', hint: 'Protege o solo e abriga animais.', gradient: 'from-green-400 to-emerald-600' },
+  { id: 'borboleta', name: 'Borboleta', emoji: '🦋', hint: 'Poliniza flores e equilibra o ambiente.', gradient: 'from-orange-300 to-amber-500' },
+  { id: 'agua', name: 'Rio', emoji: '💧', hint: 'Fornece água limpa para a vida.', gradient: 'from-blue-400 to-cyan-500' },
+  { id: 'flor', name: 'Flor', emoji: '🌸', hint: 'Atrai abelhas e borboletas.', gradient: 'from-pink-300 to-rose-400' },
+  { id: 'sol', name: 'Sol', emoji: '☀️', hint: 'Energia para toda a natureza.', gradient: 'from-yellow-300 to-amber-400' },
+  { id: 'reciclagem', name: 'Reciclagem', emoji: '♻️', hint: 'Diminui o lixo na natureza.', gradient: 'from-teal-400 to-emerald-500' },
 ];
 
 function createMemoryDeck() {
@@ -142,54 +145,35 @@ function createMemoryDeck() {
     .sort(() => Math.random() - 0.5);
 }
 
-// ─── Recycling challenge ───────────────────────────────────────────────────────
-
-const recyclingBins = [
-  {
-    id: 'plastic',
-    label: 'Plástico',
-    colorClass: 'bg-red-500',
-    borderClass: 'border-red-300',
-    lightClass: 'bg-red-50',
-    textClass: 'text-red-700',
-  },
-  {
-    id: 'paper',
-    label: 'Papel',
-    colorClass: 'bg-blue-500',
-    borderClass: 'border-blue-300',
-    lightClass: 'bg-blue-50',
-    textClass: 'text-blue-700',
-  },
-  {
-    id: 'glass',
-    label: 'Vidro',
-    colorClass: 'bg-green-500',
-    borderClass: 'border-green-300',
-    lightClass: 'bg-green-50',
-    textClass: 'text-green-700',
-  },
-  {
-    id: 'metal',
-    label: 'Metal',
-    colorClass: 'bg-yellow-400',
-    borderClass: 'border-yellow-300',
-    lightClass: 'bg-yellow-50',
-    textClass: 'text-yellow-700',
-  },
+// ─── Recycling drag game ────────────────────────────────────────────────────────
+const dragBins_fase1 = [
+  { id: 'plastic', label: 'Plástico', svg: '/lixeiras/lixeira_plastico.svg' },
+  { id: 'paper',   label: 'Papel',    svg: '/lixeiras/lixeira_papel.svg'    },
+  { id: 'glass',   label: 'Vidro',    svg: '/lixeiras/lixeira_vidro.svg'    },
+  { id: 'metal',   label: 'Metal',    svg: '/lixeiras/lixeira_metal.svg'    },
 ];
 
-const recyclingRounds = [
-  { emoji: '🧴', name: 'Frasco de shampoo', correctBin: 'plastic', hint: 'Embalagens plásticas vão na lixeira vermelha.' },
-  { emoji: '📰', name: 'Jornal velho', correctBin: 'paper', hint: 'Papel e papelão vão na lixeira azul.' },
-  { emoji: '🍾', name: 'Garrafa de vidro', correctBin: 'glass', hint: 'Vidros vão na lixeira verde.' },
-  { emoji: '🥫', name: 'Lata de conserva', correctBin: 'metal', hint: 'Metais vão na lixeira amarela.' },
-  { emoji: '📦', name: 'Caixa de papelão', correctBin: 'paper', hint: 'Papelão é papel — vai na lixeira azul.' },
-  { emoji: '🛍️', name: 'Sacola plástica', correctBin: 'plastic', hint: 'Sacolas plásticas vão na lixeira vermelha.' },
+const dragItems_fase1 = [
+  { id: 'i1', emoji: '🧴', name: 'Frasco plástico',  correctBin: 'plastic' },
+  { id: 'i2', emoji: '📰', name: 'Jornal',            correctBin: 'paper'   },
+  { id: 'i3', emoji: '🍾', name: 'Garrafa de vidro', correctBin: 'glass'   },
+  { id: 'i4', emoji: '🥫', name: 'Lata',             correctBin: 'metal'   },
+  { id: 'i5', emoji: '📦', name: 'Caixa de papelão', correctBin: 'paper'   },
+  { id: 'i6', emoji: '🛍️', name: 'Sacola plástica',  correctBin: 'plastic' },
+];
+
+const dragBins_fase2 = [
+  ...dragBins_fase1,
+  { id: 'organic', label: 'Orgânico', svg: '/lixeiras/lixeira_organico.svg' },
+];
+
+const dragItems_fase2 = [
+  ...dragItems_fase1,
+  { id: 'i7', emoji: '🍌', name: 'Cascas de fruta',  correctBin: 'organic' },
+  { id: 'i8', emoji: '🥦', name: 'Restos de comida', correctBin: 'organic' },
 ];
 
 // ─── Practical tips ────────────────────────────────────────────────────────────
-
 const practicalTips = [
   {
     emoji: '💧',
@@ -219,7 +203,6 @@ const practicalTips = [
 ];
 
 // ─── Navigation ────────────────────────────────────────────────────────────────
-
 const tabItems = [
   { key: 'inicio', label: 'Início', icon: Home },
   { key: 'ecosistema', label: 'Eco', icon: BookOpen },
@@ -229,33 +212,26 @@ const tabItems = [
 ];
 
 // ─── UI primitives ─────────────────────────────────────────────────────────────
-
 function Card({ className = '', children }) {
   return <div className={`rounded-[24px] border-0 bg-white shadow-md ${className}`}>{children}</div>;
 }
-
 function CardHeader({ children, className = '' }) {
   return <div className={`p-5 pb-0 ${className}`}>{children}</div>;
 }
-
 function CardTitle({ children, className = '' }) {
   return <h2 className={`font-semibold text-slate-900 ${className}`}>{children}</h2>;
 }
-
 function CardDescription({ children, className = '' }) {
   return <p className={`mt-2 text-sm leading-6 text-slate-600 ${className}`}>{children}</p>;
 }
-
 function CardContent({ children, className = '' }) {
   return <div className={`p-5 ${className}`}>{children}</div>;
 }
-
 function Button({ children, className = '', variant = 'default', ...props }) {
   const styles =
     variant === 'secondary'
       ? 'bg-slate-100 text-slate-900 hover:bg-slate-200'
       : 'bg-emerald-600 text-white hover:bg-emerald-700';
-
   return (
     <button
       className={`inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${styles} ${className}`}
@@ -265,7 +241,6 @@ function Button({ children, className = '', variant = 'default', ...props }) {
     </button>
   );
 }
-
 function Badge({ children, className = '' }) {
   return (
     <span className={`inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 ${className}`}>
@@ -273,7 +248,6 @@ function Badge({ children, className = '' }) {
     </span>
   );
 }
-
 function Progress({ value }) {
   return (
     <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200">
@@ -283,7 +257,6 @@ function Progress({ value }) {
 }
 
 // ─── Header ────────────────────────────────────────────────────────────────────
-
 function Header() {
   return (
     <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-green-700 via-emerald-600 to-lime-500 p-5 text-white shadow-xl">
@@ -304,8 +277,7 @@ function Header() {
   );
 }
 
-// ─── Home screen ──────────────────────────────────────────────────────────────
-
+// ─── Home screen ───────────────────────────────────────────────────────────────
 function HomeScreen({ onStartQuiz, onOpenEcosystem, onStartGame }) {
   const [expandedTip, setExpandedTip] = useState(null);
 
@@ -313,7 +285,6 @@ function HomeScreen({ onStartQuiz, onOpenEcosystem, onStartGame }) {
     <div className="space-y-4">
       <Header />
 
-      {/* Mascot scenario */}
       <Card>
         <CardContent className="pt-5">
           <div className="flex items-start gap-3">
@@ -338,7 +309,6 @@ function HomeScreen({ onStartQuiz, onOpenEcosystem, onStartGame }) {
         </CardContent>
       </Card>
 
-      {/* About + quick actions */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
@@ -356,22 +326,18 @@ function HomeScreen({ onStartQuiz, onOpenEcosystem, onStartGame }) {
           </p>
           <div className="grid gap-3 sm:grid-cols-3">
             <Button className="h-12" onClick={onOpenEcosystem}>
-              <BookOpen className="h-4 w-4" />
-              Ecossistema
+              <BookOpen className="h-4 w-4" /> Ecossistema
             </Button>
             <Button variant="secondary" className="h-12" onClick={onStartQuiz}>
-              <Brain className="h-4 w-4" />
-              Jogar quiz
+              <Brain className="h-4 w-4" /> Jogar quiz
             </Button>
             <Button variant="secondary" className="h-12" onClick={onStartGame}>
-              <Gamepad2 className="h-4 w-4" />
-              Memória
+              <Gamepad2 className="h-4 w-4" /> Memória
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Practical tips */}
       <Card>
         <CardHeader>
           <CardTitle className="text-xl">Dicas práticas</CardTitle>
@@ -421,7 +387,6 @@ function HomeScreen({ onStartQuiz, onOpenEcosystem, onStartGame }) {
 }
 
 // ─── Ecosystem screen ──────────────────────────────────────────────────────────
-
 function EcosystemScreen() {
   return (
     <div className="space-y-4">
@@ -435,12 +400,17 @@ function EcosystemScreen() {
             transition={{ delay: index * 0.06 }}
           >
             <Card className="overflow-hidden">
-              <div className={`bg-gradient-to-br ${item.gradient} flex items-center justify-center py-10`}>
+              <div className={`relative overflow-hidden bg-gradient-to-br ${item.gradient} flex items-center justify-center py-12`}>
+                {/* Decorative shapes */}
+                <div className="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-white/10" />
+                <div className="absolute -bottom-4 -left-4 h-20 w-20 rounded-full bg-black/10" />
+                <div className="absolute top-3 right-16 h-8 w-8 rounded-full bg-white/15" />
+                <div className="absolute bottom-3 left-16 h-5 w-5 rounded-full bg-white/20" />
                 <motion.span
                   initial={{ scale: 0.6, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: index * 0.06 + 0.1, type: 'spring', stiffness: 260, damping: 20 }}
-                  className="text-7xl"
+                  className="relative z-10 text-8xl drop-shadow-lg"
                   role="img"
                   aria-label={item.title}
                 >
@@ -472,16 +442,26 @@ function EcosystemScreen() {
 }
 
 // ─── Quiz screen ───────────────────────────────────────────────────────────────
-
 function QuizScreen() {
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
+  const feedbackRef = useRef(null);
 
   const question = quizQuestions[current];
-  const progress = useMemo(() => ((current + (finished ? 1 : 0)) / quizQuestions.length) * 100, [current, finished]);
+
+  // Quando a explicação aparece, rola suavemente até ela para o usuário ler antes de avançar
+  useEffect(() => {
+    if (showFeedback && feedbackRef.current) {
+      feedbackRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [showFeedback]);
+  const progress = useMemo(
+    () => ((current + (finished ? 1 : 0)) / quizQuestions.length) * 100,
+    [current, finished],
+  );
 
   const handleAnswer = (index) => {
     if (showFeedback) return;
@@ -542,8 +522,7 @@ function QuizScreen() {
           <Progress value={percent} />
           <p className="text-sm text-slate-600">Você acertou {percent}% das perguntas.</p>
           <Button onClick={restart} className="h-12 w-full">
-            <RotateCcw className="h-4 w-4" />
-            Jogar novamente
+            <RotateCcw className="h-4 w-4" /> Jogar novamente
           </Button>
         </CardContent>
       </Card>
@@ -563,7 +542,7 @@ function QuizScreen() {
           <Badge>{score} ponto{score === 1 ? '' : 's'}</Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-4">
         <Progress value={progress} />
 
         <AnimatePresence mode="wait">
@@ -573,22 +552,27 @@ function QuizScreen() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -12 }}
             transition={{ duration: 0.2 }}
-            className="space-y-4"
+            className="space-y-3"
           >
-            <div className="rounded-[24px] bg-slate-50 p-4">
+            {/* Illustrated question card with gradient background */}
+            <div className={`relative overflow-hidden rounded-[24px] bg-gradient-to-br ${question.gradient} p-4 text-center`}>
+              <div className="absolute -top-6 -right-6 h-20 w-20 rounded-full bg-white/10" />
+              <div className="absolute -bottom-4 -left-4 h-16 w-16 rounded-full bg-black/10" />
               <motion.div
                 key={`img-${current}`}
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
+                initial={{ scale: 0.3, opacity: 0, rotate: -15 }}
+                animate={{ scale: 1, opacity: 1, rotate: 0 }}
                 transition={{ delay: 0.1, type: 'spring', stiffness: 300, damping: 20 }}
-                className="mb-3 text-center text-5xl"
+                className="relative z-10 mb-2 text-5xl drop-shadow"
               >
                 {question.image}
               </motion.div>
-              <p className="text-lg font-semibold leading-7 text-slate-900">{question.question}</p>
+              <p className="relative z-10 text-[15px] font-bold leading-6 text-white drop-shadow">
+                {question.question}
+              </p>
             </div>
 
-            <div className="grid gap-3">
+            <div className="grid gap-2">
               {question.options.map((option, index) => {
                 const isCorrect = index === question.answer;
                 const isSelected = selected === index;
@@ -598,7 +582,7 @@ function QuizScreen() {
                   <button
                     key={option}
                     onClick={() => handleAnswer(index)}
-                    className={`rounded-[20px] border p-4 text-left text-sm transition-all ${
+                    className={`rounded-[18px] border p-3 text-left text-sm transition-all ${
                       showState
                         ? isCorrect
                           ? 'border-emerald-300 bg-emerald-50'
@@ -607,7 +591,7 @@ function QuizScreen() {
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <span className="leading-6 text-slate-800">{option}</span>
+                      <span className="leading-5 text-slate-800">{option}</span>
                       {showFeedback && isCorrect && <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" />}
                       {showFeedback && isSelected && !isCorrect && <XCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-rose-600" />}
                     </div>
@@ -618,29 +602,32 @@ function QuizScreen() {
           </motion.div>
         </AnimatePresence>
 
-        {showFeedback && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`rounded-[20px] p-4 text-sm leading-6 ${
-              selected === question.answer ? 'bg-emerald-50 text-emerald-950' : 'bg-amber-50 text-amber-950'
-            }`}
-          >
-            {selected === question.answer ? '✅ ' : '💡 '}
-            {question.explanation}
-          </motion.div>
-        )}
+        <div ref={feedbackRef} className="scroll-mt-4 space-y-3">
+          {showFeedback && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`rounded-[20px] p-4 text-sm leading-6 ${
+                selected === question.answer ? 'bg-emerald-50 text-emerald-950' : 'bg-amber-50 text-amber-950'
+              }`}
+            >
+              <p className="mb-1 font-bold">
+                {selected === question.answer ? '✅ Você acertou!' : '💡 Por que?'}
+              </p>
+              {question.explanation}
+            </motion.div>
+          )}
 
-        <Button onClick={nextQuestion} disabled={!showFeedback} className="h-12 w-full">
-          {current + 1 === quizQuestions.length ? 'Ver resultado' : 'Próxima pergunta'}
-        </Button>
+          <Button onClick={nextQuestion} disabled={!showFeedback} className="h-12 w-full">
+            {current + 1 === quizQuestions.length ? 'Ver resultado' : 'Próxima pergunta'}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
 }
 
 // ─── Memory game screen ────────────────────────────────────────────────────────
-
 function MemoryGameScreen() {
   const [cards, setCards] = useState(() => createMemoryDeck());
   const [flippedCards, setFlippedCards] = useState([]);
@@ -662,7 +649,6 @@ function MemoryGameScreen() {
 
   useEffect(() => {
     if (flippedCards.length !== 2) return undefined;
-
     const [first, second] = flippedCards;
     setMoves((prev) => prev + 1);
     setLocked(true);
@@ -683,7 +669,6 @@ function MemoryGameScreen() {
       setLocked(false);
       setStatus('Vire duas cartas para encontrar figuras iguais.');
     }, 900);
-
     return () => window.clearTimeout(timer);
   }, [flippedCards]);
 
@@ -730,28 +715,26 @@ function MemoryGameScreen() {
                 animate={{ scale: done ? 0.93 : 1 }}
                 whileTap={{ scale: 0.9 }}
                 transition={{ duration: 0.15 }}
-                className={`flex aspect-[3/4] min-h-[88px] flex-col items-center justify-center rounded-[20px] border p-1.5 text-center transition-colors ${
+                className={`flex aspect-[3/4] min-h-[88px] items-center justify-center overflow-hidden rounded-[20px] border transition-colors ${
                   open
                     ? done
-                      ? 'border-emerald-200 bg-emerald-50 shadow-sm'
-                      : 'border-emerald-400 bg-white shadow-md'
+                      ? 'border-emerald-200 shadow-sm'
+                      : 'border-emerald-400 shadow-md'
                     : 'border-emerald-200 bg-emerald-600 text-white shadow hover:bg-emerald-700'
                 }`}
               >
                 {open ? (
-                  <>
-                    <motion.span
-                      initial={{ scale: 0.4, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                      className="text-[28px] leading-none"
-                    >
-                      {card.emoji}
-                    </motion.span>
-                    <span className="mt-1.5 text-[10px] font-semibold leading-tight text-slate-700">
+                  <motion.div
+                    initial={{ scale: 0.4, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    className={`flex h-full w-full flex-col items-center justify-center bg-gradient-to-br ${card.gradient} p-1`}
+                  >
+                    <span className="text-[32px] leading-none drop-shadow">{card.emoji}</span>
+                    <span className="mt-1 text-[9px] font-bold leading-tight text-white drop-shadow">
                       {card.name}
                     </span>
-                  </>
+                  </motion.div>
                 ) : (
                   <span className="text-2xl">🍃</span>
                 )}
@@ -790,209 +773,363 @@ function MemoryGameScreen() {
         </motion.div>
 
         <Button onClick={restart} variant="secondary" className="h-12 w-full">
-          <RotateCcw className="h-4 w-4" />
-          Reiniciar jogo
+          <RotateCcw className="h-4 w-4" /> Reiniciar jogo
         </Button>
       </CardContent>
     </Card>
   );
 }
 
-// ─── Recycling challenge screen ────────────────────────────────────────────────
+// ─── Recycling Drag Game ────────────────────────────────────────────────────────
+function DraggableItem({ item, bins, binRefs, onCorrect, onWrong }) {
+  const controls = useAnimation();
 
-function RecyclingChallengeScreen() {
-  const [currentRound, setCurrentRound] = useState(0);
-  const [selected, setSelected] = useState(null);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [score, setScore] = useState(0);
-  const [finished, setFinished] = useState(false);
+  useEffect(() => {
+    controls.start({ scale: 1, opacity: 1, transition: { type: 'spring', stiffness: 300, damping: 22 } });
+  }, [controls]);
 
-  const round = recyclingRounds[currentRound];
-  const progress = ((currentRound + (finished ? 1 : 0)) / recyclingRounds.length) * 100;
+  const handleDragEnd = async (_, info) => {
+    // info.point is in page coords; getBoundingClientRect is in viewport coords — add scroll offset
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const droppedIndex = bins.findIndex((_, i) => {
+      const rect = binRefs.current[i]?.getBoundingClientRect();
+      if (!rect) return false;
+      return (
+        info.point.x >= rect.left + scrollX &&
+        info.point.x <= rect.right + scrollX &&
+        info.point.y >= rect.top + scrollY &&
+        info.point.y <= rect.bottom + scrollY
+      );
+    });
 
-  const handleBinClick = (binId) => {
-    if (showFeedback) return;
-    setSelected(binId);
-    setShowFeedback(true);
-    if (binId === round.correctBin) setScore((s) => s + 1);
-  };
-
-  const nextRound = () => {
-    if (currentRound + 1 < recyclingRounds.length) {
-      setCurrentRound((r) => r + 1);
-      setSelected(null);
-      setShowFeedback(false);
+    if (droppedIndex >= 0 && bins[droppedIndex].id === item.correctBin) {
+      await controls.start({ scale: 0, opacity: 0, y: -24, transition: { duration: 0.22 } });
+      onCorrect();
     } else {
-      setFinished(true);
+      if (droppedIndex >= 0) onWrong();
+      controls.start({ x: 0, y: 0, transition: { type: 'spring', stiffness: 500, damping: 30 } });
     }
   };
 
-  const restart = () => {
-    setCurrentRound(0);
-    setSelected(null);
-    setShowFeedback(false);
-    setScore(0);
-    setFinished(false);
+  return (
+    <motion.div
+      drag
+      dragMomentum={false}
+      animate={controls}
+      initial={{ scale: 0.5, opacity: 0 }}
+      whileDrag={{ scale: 1.15, zIndex: 50 }}
+      onDragEnd={handleDragEnd}
+      style={{ touchAction: 'none', userSelect: 'none', cursor: 'grab' }}
+      className="flex flex-col items-center justify-center active:cursor-grabbing"
+    >
+      <span className="text-6xl leading-none drop-shadow-md">{item.emoji}</span>
+      <span className="mt-1 text-center text-xs font-semibold text-slate-600">{item.name}</span>
+    </motion.div>
+  );
+}
+
+function RecyclingDragGame({ items: rawItems, bins, onComplete }) {
+  const [items] = useState(() => [...rawItems].sort(() => Math.random() - 0.5));
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [itemKey, setItemKey] = useState(0);
+  const [score, setScore] = useState(0);
+  const [errors, setErrors] = useState(0);
+  const [feedback, setFeedback] = useState(null);
+  const binRefs = useRef([]);
+
+  const finished = currentIndex >= items.length;
+  const progress = (currentIndex / items.length) * 100;
+
+  useEffect(() => {
+    if (finished && onComplete) onComplete({ score, errors });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished]);
+
+  const handleCorrect = () => {
+    setScore((s) => s + 1);
+    setFeedback('correct');
+    setTimeout(() => {
+      setFeedback(null);
+      setCurrentIndex((i) => i + 1);
+      setItemKey((k) => k + 1);
+    }, 420);
   };
 
-  if (finished) {
-    const percent = Math.round((score / recyclingRounds.length) * 100);
-    const trophy = percent === 100 ? '🏆' : percent >= 60 ? '♻️' : '📚';
-    const message =
-      percent === 100
-        ? 'Perfeito! Você é um mestre da reciclagem!'
-        : percent >= 60
-          ? 'Muito bem! Você já sabe reciclar bastante.'
-          : 'Continue praticando! A reciclagem salva o planeta.';
+  const handleWrong = () => {
+    setErrors((e) => e + 1);
+    setFeedback('wrong');
+    setTimeout(() => setFeedback(null), 1000);
+  };
 
+  if (finished) return null;
+
+  const item = items[currentIndex];
+
+  return (
+    <div className="space-y-2">
+      {/* Progress + counters */}
+      <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+        <span>{currentIndex}/{items.length} itens</span>
+        <div className="flex gap-3 font-semibold">
+          <span className="text-emerald-600">✅ {score}</span>
+          <span className="text-rose-500">❌ {errors}</span>
+        </div>
+      </div>
+      <Progress value={progress} />
+
+      {/* Bins — big, always fully visible */}
+      <div className={`grid gap-2 pt-3 ${bins.length <= 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
+        {bins.map((bin, i) => (
+          <div
+            key={bin.id}
+            ref={(el) => { binRefs.current[i] = el; }}
+            className="flex flex-col items-center gap-1"
+          >
+            <img
+              src={bin.svg}
+              alt={bin.label}
+              draggable={false}
+              className="h-24 w-auto select-none drop-shadow-sm"
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Instruction / feedback */}
+      <div className="min-h-[20px] text-center pt-1">
+        <AnimatePresence mode="wait">
+          {feedback ? (
+            <motion.p
+              key={feedback + currentIndex}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className={`text-sm font-semibold ${
+                feedback === 'correct' ? 'text-emerald-600' : 'text-rose-500'
+              }`}
+            >
+              {feedback === 'correct' ? '✅ Correto!' : '❌ Lixeira errada!'}
+            </motion.p>
+          ) : (
+            <motion.p
+              key="hint"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-xs text-slate-400"
+            >
+              Arraste o item para a lixeira correta 👇
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Draggable item — compact, centered */}
+      <div className="flex items-center justify-center py-2">
+        <DraggableItem
+          key={itemKey}
+          item={item}
+          bins={bins}
+          binRefs={binRefs}
+          onCorrect={handleCorrect}
+          onWrong={handleWrong}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── Missão screen (phased) ────────────────────────────────────────────────────
+function MissaoScreen() {
+  const [phase, setPhase] = useState('intro');
+  const [fase1Result, setFase1Result] = useState(null);
+
+  if (phase === 'intro') {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Resultado</CardTitle>
-          <CardDescription>Desafio da Reciclagem</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="rounded-[24px] bg-gradient-to-br from-emerald-100 to-lime-100 p-6 text-center">
-            <motion.div
-              initial={{ scale: 0, y: 12 }}
-              animate={{ scale: 1, y: 0 }}
-              transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-              className="mb-2 flex justify-center"
-            >
-              <Mascot pose={percent >= 60 ? 'animado' : 'pensativo'} size={96} />
-            </motion.div>
-            <div className="text-5xl font-bold text-emerald-800">
-              {trophy} {score}/{recyclingRounds.length}
+        <div className="relative overflow-hidden rounded-t-[24px] bg-gradient-to-br from-emerald-500 to-teal-600 p-6 text-white">
+          <div className="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-white/10" />
+          <div className="absolute -bottom-4 -left-4 h-16 w-16 rounded-full bg-black/10" />
+          <div className="relative z-10 flex items-center gap-4">
+            <Mascot pose="reciclando" size={72} />
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-100">Missão da Terra</p>
+              <h2 className="text-xl font-bold leading-tight">Desafio da Reciclagem</h2>
             </div>
-            <p className="mt-2 text-sm text-emerald-900">{message}</p>
           </div>
-          <Progress value={percent} />
-          <p className="text-sm text-slate-600">Você acertou {percent}% das questões.</p>
+        </div>
+        <CardContent className="space-y-4 pt-5">
+          <div className="rounded-[20px] bg-emerald-50 p-4">
+            <p className="text-sm leading-6 text-emerald-900">
+              Olá, agente ambiental! 🌍 Preciso da sua ajuda para salvar o planeta!
+              Neste desafio você vai <strong>arrastar os resíduos</strong> para a lixeira certa e aprender a separar o lixo corretamente!
+            </p>
+          </div>
 
-          <div className="rounded-[20px] bg-slate-50 p-4 space-y-2">
-            <p className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-3">Guia de reciclagem</p>
-            {recyclingBins.map((bin) => (
-              <div key={bin.id} className="flex items-center gap-3 text-sm text-slate-700">
-                <div className={`h-4 w-4 flex-shrink-0 rounded-full ${bin.colorClass}`} />
-                <span>
-                  <strong>{bin.label}</strong>
-                  {' — lixeira '}
-                  {bin.id === 'plastic' ? 'vermelha' : bin.id === 'paper' ? 'azul' : bin.id === 'glass' ? 'verde' : 'amarela'}
-                </span>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 rounded-[16px] bg-slate-50 p-3">
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">
+                1
               </div>
-            ))}
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Fase 1 — Básico</p>
+                <p className="text-xs text-slate-500">4 pares: plástico, papel, vidro e metal</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 rounded-[16px] bg-slate-50 p-3 opacity-50">
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-400 text-sm font-bold text-white">
+                2
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Fase 2 — Avançado</p>
+                <p className="text-xs text-slate-500">6 pares: inclui orgânico e eletrônicos</p>
+              </div>
+            </div>
           </div>
 
-          <Button onClick={restart} className="h-12 w-full">
-            <RotateCcw className="h-4 w-4" />
-            Jogar novamente
+          <Button onClick={() => setPhase('fase1')} className="h-12 w-full">
+            <ChevronRight className="h-4 w-4" /> Começar Fase 1
           </Button>
         </CardContent>
       </Card>
     );
   }
 
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-start gap-3">
-          <div className="flex-shrink-0">
-            <Mascot pose="reciclando" size={56} />
-          </div>
-          <div>
-            <CardTitle className="text-2xl">Desafio da Reciclagem</CardTitle>
-            <CardDescription>
-              Item {currentRound + 1} de {recyclingRounds.length}
-            </CardDescription>
-          </div>
-          <Badge className="ml-auto flex-shrink-0">{score} pt{score === 1 ? '' : 's'}</Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        <Progress value={progress} />
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentRound}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-4"
-          >
-            {/* Item to sort */}
-            <div className="rounded-[24px] bg-slate-50 p-6 text-center">
-              <motion.div
-                initial={{ scale: 0.4, rotate: -15 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                className="mb-3 text-7xl"
-              >
-                {round.emoji}
-              </motion.div>
-              <p className="text-lg font-bold text-slate-900">{round.name}</p>
-              <p className="mt-1 text-sm text-slate-500">Em qual lixeira este item vai?</p>
+  if (phase === 'fase1') {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white">
+              1
             </div>
-
-            {/* Bin options */}
-            <div className="grid grid-cols-2 gap-3">
-              {recyclingBins.map((bin) => {
-                const isSelected = selected === bin.id;
-                const isCorrect = bin.id === round.correctBin;
-
-                return (
-                  <button
-                    key={bin.id}
-                    onClick={() => handleBinClick(bin.id)}
-                    disabled={showFeedback}
-                    className={`flex flex-col items-center gap-2 rounded-[20px] border-2 p-4 transition-all ${
-                      showFeedback
-                        ? isCorrect
-                          ? 'border-emerald-400 bg-emerald-50'
-                          : isSelected
-                            ? 'border-rose-400 bg-rose-50'
-                            : `${bin.borderClass} bg-white opacity-40`
-                        : `${bin.borderClass} bg-white hover:bg-slate-50 active:scale-95`
-                    }`}
-                  >
-                    {/* Bin visual */}
-                    <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-2xl ${bin.colorClass} shadow-sm`}
-                    >
-                      {showFeedback && isCorrect && <CheckCircle2 className="h-6 w-6 text-white" />}
-                      {showFeedback && isSelected && !isCorrect && <XCircle className="h-6 w-6 text-white" />}
-                    </div>
-                    <span className={`text-sm font-semibold ${bin.textClass}`}>{bin.label}</span>
-                  </button>
-                );
-              })}
+            <div>
+              <CardTitle className="text-xl">Fase 1 — Básico</CardTitle>
+              <CardDescription>Arraste cada item para a lixeira correta.</CardDescription>
             </div>
-          </motion.div>
-        </AnimatePresence>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-3">
+          <RecyclingDragGame
+            items={dragItems_fase1}
+            bins={dragBins_fase1}
+            onComplete={(result) => {
+              setFase1Result(result);
+              setPhase('fase1-result');
+            }}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
 
-        {showFeedback && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`rounded-[20px] p-4 text-sm leading-6 ${
-              selected === round.correctBin ? 'bg-emerald-50 text-emerald-950' : 'bg-amber-50 text-amber-950'
-            }`}
-          >
-            {selected === round.correctBin ? '✅ Correto! ' : '💡 '}
-            {round.hint}
-          </motion.div>
-        )}
+  if (phase === 'fase1-result') {
+    const erros = fase1Result?.errors ?? 0;
+    const passed = erros <= 4;
+    return (
+      <Card>
+        <CardContent className="space-y-5 pt-6">
+          <div className="rounded-[24px] bg-gradient-to-br from-emerald-100 to-lime-100 p-6 text-center">
+            <div className="mb-3 flex justify-center">
+              <Mascot pose={passed ? 'animado' : 'pensativo'} size={96} />
+            </div>
+            <div className="text-3xl font-bold text-emerald-800">
+              {passed ? '🌟 Fase 1 concluída!' : '📚 Continue praticando!'}
+            </div>
+            <p className="mt-2 text-sm text-emerald-900">
+              {fase1Result?.moves} jogadas · {erros} erro{erros !== 1 ? 's' : ''}
+            </p>
+          </div>
 
-        <Button onClick={nextRound} disabled={!showFeedback} className="h-12 w-full">
-          {currentRound + 1 === recyclingRounds.length ? 'Ver resultado' : 'Próximo item'}
-        </Button>
-      </CardContent>
-    </Card>
-  );
+          <div className="space-y-3">
+            <Button onClick={() => setPhase('fase2')} className="h-12 w-full">
+              <ChevronRight className="h-4 w-4" /> Continuar para Fase 2
+            </Button>
+            <Button variant="secondary" onClick={() => setPhase('fase1')} className="h-11 w-full">
+              <RotateCcw className="h-4 w-4" /> Repetir Fase 1
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (phase === 'fase2') {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-purple-600 text-xs font-bold text-white">
+              2
+            </div>
+            <div>
+              <CardTitle className="text-xl">Fase 2 — Avançado</CardTitle>
+              <CardDescription>Agora com orgânicos e eletrônicos!</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-3">
+          <RecyclingDragGame
+            items={dragItems_fase2}
+            bins={dragBins_fase2}
+            onComplete={() => setPhase('fim')}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (phase === 'fim') {
+    return (
+      <Card>
+        <CardContent className="space-y-5 pt-6">
+          <div className="rounded-[24px] bg-gradient-to-br from-purple-100 to-emerald-100 p-6 text-center">
+            <motion.div
+              initial={{ scale: 0, rotate: -10 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+              className="mb-3 flex justify-center"
+            >
+              <Mascot pose="animado" size={112} />
+            </motion.div>
+            <div className="text-3xl font-bold text-emerald-800">🏆 Missão cumprida!</div>
+            <p className="mt-2 text-sm leading-6 text-emerald-900">
+              Você completou as duas fases! Agora já sabe separar o lixo corretamente.
+            </p>
+          </div>
+
+          <div className="space-y-2 rounded-[20px] bg-slate-50 p-4">
+            <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">Guia de reciclagem</p>
+            {[
+              { color: 'bg-red-500', label: 'Plástico', bin: 'lixeira vermelha' },
+              { color: 'bg-blue-500', label: 'Papel', bin: 'lixeira azul' },
+              { color: 'bg-green-500', label: 'Vidro', bin: 'lixeira verde' },
+              { color: 'bg-yellow-400', label: 'Metal', bin: 'lixeira amarela' },
+              { color: 'bg-amber-700', label: 'Orgânico', bin: 'lixeira marrom' },
+              { color: 'bg-purple-500', label: 'Eletrônicos / Pilhas', bin: 'ponto de coleta específico' },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-3 text-sm text-slate-700">
+                <div className={`h-4 w-4 flex-shrink-0 rounded-full ${item.color}`} />
+                <span>
+                  <strong>{item.label}</strong> — {item.bin}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <Button onClick={() => setPhase('intro')} variant="secondary" className="h-12 w-full">
+            <RotateCcw className="h-4 w-4" /> Jogar novamente
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return null;
 }
 
 // ─── Install banner ────────────────────────────────────────────────────────────
-
 function InstallBanner() {
   const [prompt, setPrompt] = useState(null);
   const [dismissed, setDismissed] = useState(false);
@@ -1046,8 +1183,7 @@ function InstallBanner() {
             onClick={install}
             className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-base font-semibold text-white transition hover:bg-emerald-700 active:scale-95"
           >
-            <Download className="h-5 w-5" />
-            Instalar agora
+            <Download className="h-5 w-5" /> Instalar agora
           </button>
           <button
             onClick={() => setDismissed(true)}
@@ -1062,7 +1198,6 @@ function InstallBanner() {
 }
 
 // ─── App ───────────────────────────────────────────────────────────────────────
-
 export default function App() {
   const [tab, setTab] = useState('inicio');
 
@@ -1082,7 +1217,7 @@ export default function App() {
           {tab === 'ecosistema' && <EcosystemScreen />}
           {tab === 'quiz' && <QuizScreen />}
           {tab === 'jogo' && <MemoryGameScreen />}
-          {tab === 'missao' && <RecyclingChallengeScreen />}
+          {tab === 'missao' && <MissaoScreen />}
         </div>
 
         <div className="fixed bottom-3 left-1/2 z-50 w-[calc(100%-24px)] max-w-md -translate-x-1/2">
@@ -1090,7 +1225,6 @@ export default function App() {
             {tabItems.map((item) => {
               const Icon = item.icon;
               const active = tab === item.key;
-
               return (
                 <button
                   key={item.key}
