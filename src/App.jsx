@@ -21,7 +21,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-// ─── Ecosystem ─────────────────────────────────────────────────────────────────
+// ─── Ecosystem ────────────────────────────────────────────────────────────────
 const ecosystemInfo = [
   {
     title: 'Flora local',
